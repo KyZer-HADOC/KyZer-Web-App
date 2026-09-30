@@ -4,9 +4,7 @@
   "webDir": "www",
   "backgroundColor": "#000000",
   "server": {
-    "url": "https://kyzerhadoc.netlify.app",
     "cleartext": false,
-    "errorPath": "index.html",
     "allowNavigation": [
       "kyzerhadoc.netlify.app",
       "*.netlify.app",
@@ -14,6 +12,7 @@
     ]
   },
   "android": {
-    "allowMixedContent": false
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": true
   }
 }
