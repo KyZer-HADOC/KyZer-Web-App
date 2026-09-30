@@ -1,0 +1,19 @@
+{
+  "appId": "com.kyzerhadoc.app",
+  "appName": "KyZer_HADOC",
+  "webDir": "www",
+  "backgroundColor": "#000000",
+  "server": {
+    "url": "https://kyzerhadoc.netlify.app",
+    "cleartext": false,
+    "errorPath": "index.html",
+    "allowNavigation": [
+      "kyzerhadoc.netlify.app",
+      "*.netlify.app",
+      "*.supabase.co"
+    ]
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
