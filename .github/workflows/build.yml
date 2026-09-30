@@ -1,0 +1,68 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Patch MainActivity + manifest
+        run: |
+          mkdir -p android/app/src/main/java/com/kyzerhadoc/app
+          cp android-patch/MainActivity.java android/app/src/main/java/com/kyzerhadoc/app/MainActivity.java
+          sed -i 's|<uses-permission android:name="android.permission.INTERNET" />|<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />|' android/app/src/main/AndroidManifest.xml
+
+      - name: App icon from website logo (optional)
+        run: |
+          mkdir -p assets
+          curl -fsSL https://kyzerhadoc.netlify.app/images/logo22.png -o assets/icon-only.png || true
+          if [ -f assets/icon-only.png ]; then
+            npx --yes @capacitor/assets generate --android --iconBackgroundColor '#000000' || echo "icon generation skipped"
+          fi
+
+      - name: Sync
+        run: npx cap sync android
+
+      - name: Build debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk KyZer_HADOC.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KyZer_HADOC-apk
+          path: KyZer_HADOC.apk
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: KyZer_HADOC App v${{ github.run_number }}
+          files: KyZer_HADOC.apk
