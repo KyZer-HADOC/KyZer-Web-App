@@ -10,11 +10,10 @@ android {
 
     defaultConfig {
         applicationId = "com.kyzer.ytdl"
-        minSdk = 29
+        minSdk = 26
         targetSdk = 34
         versionCode = 2
         versionName = "2.0"
-        ndk { abiFilters += "arm64-v8a" }
     }
 
     buildFeatures { compose = true }

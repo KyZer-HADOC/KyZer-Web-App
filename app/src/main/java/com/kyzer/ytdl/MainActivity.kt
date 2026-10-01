@@ -1,13 +1,18 @@
 package com.kyzer.ytdl
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -211,6 +216,18 @@ fun App(shared: String?) {
         }
     }
 
+    val permLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
+        if (ok) startDownload()
+        else Toast.makeText(ctx, "Storage permission is needed to save files", Toast.LENGTH_LONG).show()
+    }
+
+    fun requestAndStart() {
+        if (Build.VERSION.SDK_INT < 29 &&
+            ctx.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+        ) permLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        else startDownload()
+    }
+
     LaunchedEffect(Unit) { if (shared != null && urlRegex.containsMatchIn(shared)) search() }
 
     Surface(color = cBg, modifier = Modifier.fillMaxSize()) {
@@ -329,7 +346,7 @@ fun App(shared: String?) {
                 val can = info != null && (if (isVideo) videoOpts.isNotEmpty() else mp3Opts.isNotEmpty())
                 BottomBar(
                     task = task, paused = paused, canDownload = can, downloadLabel = label,
-                    onDownload = { startDownload() },
+                    onDownload = { requestAndStart() },
                     onPause = { paused = !paused; flag.paused = paused },
                     onCancel = {
                         flag.cancelled = true; flag.paused = false; paused = false

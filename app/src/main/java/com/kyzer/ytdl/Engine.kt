@@ -5,6 +5,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.media.MediaScannerConnection
+import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import com.arthenica.ffmpegkit.FFmpegKit
@@ -16,6 +18,8 @@ import org.schabi.newpipe.extractor.stream.StreamInfo
 import org.schabi.newpipe.extractor.stream.VideoStream
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class CancelFlag {
     @Volatile var cancelled = false
@@ -269,6 +273,23 @@ object Engine {
     }
 
     private fun save(ctx: Context, file: File, name: String, mime: String): Saved {
+        if (Build.VERSION.SDK_INT < 29) {
+            // Android 8/9: write straight into Downloads/KyZer YouBe
+            val dir = File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                "KyZer YouBe"
+            ).apply { mkdirs() }
+            val dest = File(dir, name)
+            file.copyTo(dest, overwrite = true)
+            val latch = CountDownLatch(1)
+            var scanned: Uri? = null
+            MediaScannerConnection.scanFile(ctx, arrayOf(dest.path), arrayOf(mime)) { _, u ->
+                scanned = u
+                latch.countDown()
+            }
+            latch.await(3, TimeUnit.SECONDS)
+            return Saved(scanned ?: Uri.fromFile(dest), name, mime, dest.length())
+        }
         val values = ContentValues().apply {
             put(MediaStore.Downloads.DISPLAY_NAME, name)
             put(MediaStore.Downloads.MIME_TYPE, mime)
