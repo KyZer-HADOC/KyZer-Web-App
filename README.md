@@ -1,20 +1,9 @@
-# KyZer_HADOC Android App
+# KyZer YouBe (Android)
 
-Android app for https://kyzerhadoc.netlify.app (Capacitor).
+Paste (or Share from the YouTube app) a link -> choose MP4 or MP3 -> choose quality -> download with a live progress bar.
+Files are saved to Downloads/KyZer YouBe.
 
-- Opens with a small local loader screen, then loads the live website, so the UI, animations, background song and every page stay the same as the web. Web updates show up in the app automatically.
-- Native download manager: downloads get a notification with progress and are saved to the phone's Downloads folder.
-- Background song autoplays and pauses when the app is minimised.
-- Offline screen with a retry button (server unreachable / no internet).
+- App icon: put `icon.ico` in the repo root; the build converts it automatically.
+- APK: Actions -> latest run -> Artifacts -> KyZer-YouBe-apk.
 
-## Get the APK
-Push to `main` (or run "Build APK" from the Actions tab). The APK is attached to the latest Release and to the workflow run as an artifact.
-
-## Local build (optional)
-```
-npm install
-npx cap add android
-# copy android-patch/MainActivity.java to android/app/src/main/java/com/kyzerhadoc/app/
-npx cap sync android
-cd android && ./gradlew assembleDebug
-```
+Only download content you own or have the right to save; downloading may violate YouTube's Terms of Service.
